@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타이타닉 생존자 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">타이타닉 생존자 분석 대시보드</h1>
+        <p class="mb-8 text-gray-600 text-center">사회적 약자 배려 원칙과 성인 남성 생존율의 상대적 비교를 확인해보세요.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">1. 그룹별 탑승 인원</h2>
+                <canvas id="chart1"></canvas>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">2. 생존자 구성 비율</h2>
+                <canvas id="chart2"></canvas>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">3. 그룹별 생존율</h2>
+                <canvas id="chart3"></canvas>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">4. 선택 그룹 vs 성인 남성 생존율 비교</h2>
+                <select id="groupSelector" class="mb-4 p-2 border rounded w-full">
+                    <option value="female">여성</option>
+                    <option value="child">어린이 (13세 이하)</option>
+                    <option value="elderly">연장자 (60세 이상)</option>
+                </select>
+                <canvas id="chart5"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            maleAdultRate: 14, // 성인 남성 생존율 14%
+            groups: {
+                female: { name: '여성', rate: 74 },
+                child: { name: '어린이', rate: 58 },
+                elderly: { name: '연장자', rate: 22 }
+            }
+        };
+
+        function renderCharts() {
+            new Chart(document.getElementById('chart1'), {
+                type: 'bar',
+                data: {
+                    labels: ['여성', '어린이', '연장자', '성인 남성'],
+                    datasets: [{ label: '인원수', data: [314, 60, 22, 495], backgroundColor: 'rgba(54, 162, 235, 0.5)' }]
+                }
+            });
+
+            new Chart(document.getElementById('chart2'), {
+                type: 'pie',
+                data: {
+                    labels: ['어드벤테이지 그룹', '성인 남성'],
+                    datasets: [{ data: [273, 69], backgroundColor: ['#FF6384', '#36A2EB'] }]
+                }
+            });
+
+            new Chart(document.getElementById('chart3'), {
+                type: 'bar',
+                data: {
+                    labels: ['여성', '어린이', '연장자', '성인 남성'],
+                    datasets: [{ label: '생존율 (%)', data: [74, 58, 22, 14], backgroundColor: '#FFCE56' }]
+                }
+            });
+
+            updateComparisonChart('female');
+        }
+
+        function updateComparisonChart(groupKey) {
+            const ctx = document.getElementById('chart5').getContext('2d');
+            if (window.myChart5) window.myChart5.destroy();
+            
+            const group = data.groups[groupKey];
+            window.myChart5 = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [group.name, '성인 남성 (기준)'],
+                    datasets: [{
+                        label: '생존율 (%)',
+                        data: [group.rate, data.maleAdultRate],
+                        backgroundColor: ['#FF6384', '#36A2EB']
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+        }
+
+        document.getElementById('groupSelector').addEventListener('change', (e) => updateComparisonChart(e.target.value));
+        window.onload = renderCharts;
+    </script>
+</body>
+</html>
